@@ -137,7 +137,7 @@ MAIN MENU
 
 ### Key Features:
 
-**Option 1: Payment Tracking** - THE MAIN FEATURE!
+**Option 1: Payment Tracking** 
 
 - See who owes money
 - See who's paid up
@@ -155,16 +155,6 @@ MAIN MENU
 - See exactly which payments are overdue
 - How many days overdue
 - Amount owed
-
-## 📸 Screenshots Required
-
-For your submission, take screenshots of:
-
-1. **Database Diagram** (use MySQL Workbench: Database > Reverse Engineer)
-2. **Row Count Proof** (run: `SELECT COUNT(*) FROM payments;` showing 114+)
-3. **Application Running** (show the main menu)
-4. **Payment Tracking Screen** (Option 1 - shows who owes what)
-5. **Payment Summary Report** (Option 6 - shows totals)
 
 ## 🗂️ Project Structure
 
@@ -223,28 +213,6 @@ rentflow-property-manager/
 - **Hibernate** - ORM for database interaction
 - **MySQL 8.0** - Robust relational database
 - **Maven** - Dependency management
-
-## 🎓 Graduate Credit Requirements
-
-This project fulfills all graduate requirements:
-
-- ✅ 5 tables (Properties, Tenants, Leases, Payments, Maintenance)
-- ✅ 3+ relationships using foreign keys
-- ✅ Proper constraints and data validation
-- ✅ All CRUD operations implemented
-- ✅ 50+ test data rows (actually 152!)
-- ✅ Professional, bug-free application
-
-## 💪 The Wim Hof Philosophy
-
-Like Wim Hof teaches us to master the cold, this application teaches you to master your rental data:
-
-- **Clear** - See exactly what's happening
-- **Strong** - Built on solid relationships
-- **Focused** - Payment tracking first and foremost
-- **Reliable** - Professional-grade code
-
-**BREATHE IN THE DATA. BREATHE OUT THE INSIGHTS.** ❄️
 
 ## 📝 License
 
