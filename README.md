@@ -137,7 +137,7 @@ MAIN MENU
 
 ### Key Features:
 
-**Option 1: Payment Tracking** 
+**Option 1: Payment Tracking**
 
 - See who owes money
 - See who's paid up
@@ -204,6 +204,41 @@ rentflow-property-manager/
 
 - Another MySQL instance is running
 - Change the port in application.properties
+
+## 🌐 REST API (Service Layer)
+
+The application exposes REST endpoints under `/api`.
+
+**Core resources (CRUD):**
+
+- `GET /api/properties` (list)
+- `GET /api/properties/{id}` (read)
+- `POST /api/properties` (create)
+- `PUT /api/properties/{id}` (update)
+- `DELETE /api/properties/{id}` (delete)
+
+Equivalent CRUD endpoints exist for `/api/tenants`, `/api/leases`, `/api/payments`, and `/api/maintenance-requests`.
+
+## 🧪 Console Client (Service Test)
+
+A simple console client is included to test the REST services via HTTP.
+
+- Class: `com.rentflow.client.ServiceConsoleClient`
+- It performs **create → read → update → read → delete → read** against `/api/properties`.
+- Requires the service running at `http://localhost:8080` (or set `RENTFLOW_BASE_URL`).
+
+## ☁️ Hosting (Example: Render)
+
+The service can be hosted on a platform like Render using:
+
+- **Build command:** `mvn clean package`
+- **Start command:** `java -jar target/rentflow-property-manager-1.0.0.jar`
+- **Environment variables:**
+  - `SPRING_DATASOURCE_URL`
+  - `SPRING_DATASOURCE_USERNAME`
+  - `SPRING_DATASOURCE_PASSWORD`
+
+This hosts the REST services under `/api/*` on port 8080.
 
 ## 📚 Technologies Used
 

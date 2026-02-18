@@ -13,6 +13,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Hosting note (example platform: Render):
+ * 1) Build command: mvn clean package
+ * 2) Start command: java -jar target/rentflow-property-manager-1.0.0.jar
+ * 3) Set env vars: SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME,
+ * SPRING_DATASOURCE_PASSWORD
+ * 4) Expose port 8080 (Render detects PORT; Spring Boot uses 8080 by default).
+ * This hosts the REST services under /api/*.
+ */
 @SpringBootApplication
 public class RentFlowApplication {
 
@@ -22,10 +31,10 @@ public class RentFlowApplication {
 
     @Bean
     public CommandLineRunner run(PropertyRepository propertyRepo,
-                                TenantRepository tenantRepo,
-                                LeaseRepository leaseRepo,
-                                PaymentRepository paymentRepo,
-                                MaintenanceRequestRepository maintenanceRepo) {
+            TenantRepository tenantRepo,
+            LeaseRepository leaseRepo,
+            PaymentRepository paymentRepo,
+            MaintenanceRequestRepository maintenanceRepo) {
         return args -> {
             Scanner scanner = new Scanner(System.in);
             boolean running = true;
@@ -109,7 +118,8 @@ public class RentFlowApplication {
         System.out.println("💰 PAYMENT TRACKING - WHO OWES WHAT");
         System.out.println("=".repeat(70));
 
-        // Use fetch-join query to initialize property and tenant while the session is open
+        // Use fetch-join query to initialize property and tenant while the session is
+        // open
         List<Lease> activeLeases = leaseRepo.findAllActiveLeasesWithPropertyAndTenant();
         LocalDate today = LocalDate.now();
 
@@ -129,8 +139,10 @@ public class RentFlowApplication {
             BigDecimal paidAmount = paymentRepo.getTotalPaymentsForLease(lease.getLeaseId());
             BigDecimal outstanding = paymentRepo.getOutstandingBalanceForLease(lease.getLeaseId(), today);
 
-            if (paidAmount == null) paidAmount = BigDecimal.ZERO;
-            if (outstanding == null) outstanding = BigDecimal.ZERO;
+            if (paidAmount == null)
+                paidAmount = BigDecimal.ZERO;
+            if (outstanding == null)
+                outstanding = BigDecimal.ZERO;
 
             totalRent = totalRent.add(monthlyRent);
             totalPaid = totalPaid.add(paidAmount);
@@ -197,8 +209,10 @@ public class RentFlowApplication {
         BigDecimal totalRentExpected = paymentRepo.getTotalRentExpected(LocalDate.now());
         Long latePaymentCount = paymentRepo.countLatePayments();
 
-        if (totalRentReceived == null) totalRentReceived = BigDecimal.ZERO;
-        if (totalRentExpected == null) totalRentExpected = BigDecimal.ZERO;
+        if (totalRentReceived == null)
+            totalRentReceived = BigDecimal.ZERO;
+        if (totalRentExpected == null)
+            totalRentExpected = BigDecimal.ZERO;
 
         BigDecimal collectionRate = BigDecimal.ZERO;
         if (totalRentExpected.compareTo(BigDecimal.ZERO) > 0) {
@@ -289,7 +303,8 @@ public class RentFlowApplication {
         System.out.println("💵 ALL PAYMENTS");
         System.out.println("=".repeat(70));
 
-        // Use fetch-join to initialize associated lease and tenant to avoid lazy-init issues
+        // Use fetch-join to initialize associated lease and tenant to avoid lazy-init
+        // issues
         List<Payment> payments = paymentRepo.findAllWithLeaseAndTenant();
 
         System.out.printf("\n%-5s %-25s %-12s %-10s %-12s\n",
@@ -322,8 +337,7 @@ public class RentFlowApplication {
         System.out.println("-".repeat(69));
 
         for (MaintenanceRequest request : requests) {
-            BigDecimal cost = request.getEstimatedCost() != null ?
-                    request.getEstimatedCost() : BigDecimal.ZERO;
+            BigDecimal cost = request.getEstimatedCost() != null ? request.getEstimatedCost() : BigDecimal.ZERO;
 
             System.out.printf("%-5d %-25s %-12s %-12s $%-14.2f\n",
                     request.getRequestId(),
@@ -337,7 +351,8 @@ public class RentFlowApplication {
     }
 
     private static String truncate(String str, int maxLength) {
-        if (str == null) return "";
+        if (str == null)
+            return "";
         return str.length() <= maxLength ? str : str.substring(0, maxLength - 3) + "...";
     }
 }
