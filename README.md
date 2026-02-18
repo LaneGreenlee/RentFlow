@@ -159,28 +159,55 @@ MAIN MENU
 ## 🗂️ Project Structure
 
 ```
-rentflow-property-manager/
+RentFlow/
 ├── pom.xml                          # Maven configuration
+├── README.md                        # Project documentation
+├── QUICK_START.md                   # Short setup guide
+├── PROJECT_SUMMARY.md               # Project overview
 ├── schema.sql                       # Database creation script
 ├── test_data.sql                    # 114 payment records + more
+├── verify_database.sql              # Verification queries
 ├── src/
 │   └── main/
 │       ├── java/com/rentflow/
-│       │   ├── RentFlowApplication.java    # Main console app
-│       │   ├── model/                       # Entity classes
-│       │   │   ├── Property.java
-│       │   │   ├── Tenant.java
+│       │   ├── RentFlowApplication.java      # Spring Boot entry point + console UI
+│       │   ├── client/
+│       │   │   └── ServiceConsoleClient.java # REST service test client
+│       │   ├── controller/                   # REST API layer
+│       │   │   ├── LeaseController.java
+│       │   │   ├── MaintenanceRequestController.java
+│       │   │   ├── PaymentController.java
+│       │   │   ├── PropertyController.java
+│       │   │   └── TenantController.java
+│       │   ├── model/                        # Entity + enum types
+│       │   │   ├── EmploymentStatus.java
 │       │   │   ├── Lease.java
+│       │   │   ├── LeaseStatus.java
+│       │   │   ├── MaintenanceRequest.java
+│       │   │   ├── MaintenanceStatus.java
 │       │   │   ├── Payment.java
-│       │   │   └── MaintenanceRequest.java
-│       │   └── repository/                  # Data access layer (CRUD)
-│       │       ├── PropertyRepository.java
-│       │       ├── TenantRepository.java
-│       │       ├── LeaseRepository.java
-│       │       ├── PaymentRepository.java
-│       │       └── MaintenanceRequestRepository.java
+│       │   │   ├── PaymentMethod.java
+│       │   │   ├── PaymentStatus.java
+│       │   │   ├── PaymentType.java
+│       │   │   ├── Priority.java
+│       │   │   ├── Property.java
+│       │   │   ├── PropertyType.java
+│       │   │   └── Tenant.java
+│       │   ├── repository/                  # Data access layer (CRUD)
+│       │   │   ├── LeaseRepository.java
+│       │   │   ├── MaintenanceRequestRepository.java
+│       │   │   ├── PaymentRepository.java
+│       │   │   ├── PropertyRepository.java
+│       │   │   └── TenantRepository.java
+│       │   └── service/                      # Business layer
+│       │       ├── LeaseService.java
+│       │       ├── MaintenanceRequestService.java
+│       │       ├── PaymentService.java
+│       │       ├── PropertyService.java
+│       │       └── TenantService.java
 │       └── resources/
-│           └── application.properties       # Database configuration
+│           └── application.properties        # Database configuration
+└── target/                                   # Build outputs
 ```
 
 ## 🔧 Troubleshooting
