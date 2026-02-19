@@ -20,6 +20,7 @@
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/service/PropertyService.java
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/model/Tenant.java
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/model/PaymentType.java
+/Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/service/ConsoleUIService.java
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/model/Priority.java
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/service/TenantService.java
 /Users/lanegreenlee/Desktop/CSCE548/RentFlow/src/main/java/com/rentflow/repository/TenantRepository.java

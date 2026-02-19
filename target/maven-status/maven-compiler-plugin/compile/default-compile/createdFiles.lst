@@ -10,6 +10,7 @@ com/rentflow/repository/PaymentRepository.class
 com/rentflow/repository/LeaseRepository.class
 com/rentflow/service/LeaseService.class
 com/rentflow/model/Tenant.class
+com/rentflow/client/ServiceConsoleClient.class
 com/rentflow/RentFlowApplication.class
 com/rentflow/model/Lease.class
 com/rentflow/model/PropertyType.class
@@ -17,6 +18,7 @@ com/rentflow/service/TenantService.class
 com/rentflow/controller/PropertyController.class
 com/rentflow/controller/LeaseController.class
 com/rentflow/model/PaymentType.class
+com/rentflow/service/ConsoleUIService.class
 com/rentflow/model/PaymentMethod.class
 com/rentflow/service/PropertyService.class
 com/rentflow/model/EmploymentStatus.class

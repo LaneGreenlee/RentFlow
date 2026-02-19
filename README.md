@@ -131,7 +131,10 @@ MAIN MENU
 6. 📊 Payment Summary Report
 7. 🔧 View Maintenance Requests
 8. ⚠️  View Overdue Payments
-9. 🚪 Exit
+9. 🏠 Property Management (CRUD)
+10. 👥 Tenant Management (CRUD)
+11. ✅ Update Maintenance Status
+12. 🚪 Exit
 ======================================================================
 ```
 
@@ -155,6 +158,20 @@ MAIN MENU
 - See exactly which payments are overdue
 - How many days overdue
 - Amount owed
+
+**Option 10: Property Management (CRUD)**
+
+- List, create, update, delete properties
+- Includes Property Explorer filters (city, state, type, bedrooms, rent range)
+
+**Option 11: Tenant Management (CRUD)**
+
+- List, create, update, delete tenants
+- Update contact info, employment status, income, and emergency contacts
+
+**Option 12: Update Maintenance Status**
+
+- Mark requests as OPEN, IN_PROGRESS, COMPLETED, or CANCELLED
 
 ## 🗂️ Project Structure
 
