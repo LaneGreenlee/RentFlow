@@ -3,8 +3,6 @@ package com.rentflow.service;
 import com.rentflow.model.*;
 import com.rentflow.repository.*;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +15,7 @@ import java.util.Scanner;
  * prompts.
  * This separates presentation concerns from the main Spring Boot application.
  */
-@Service
+@Deprecated
 public class ConsoleUIService {
 
     private final PropertyRepository propertyRepo;
@@ -133,7 +131,6 @@ public class ConsoleUIService {
         System.out.print("Enter your choice: ");
     }
 
-    @Transactional
     private void showPaymentTracking() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("💰 PAYMENT TRACKING - WHO OWES WHAT");
@@ -187,7 +184,6 @@ public class ConsoleUIService {
         System.out.println("=".repeat(70));
     }
 
-    @Transactional
     private void showOverduePayments() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("⚠️  OVERDUE PAYMENTS");
@@ -256,7 +252,6 @@ public class ConsoleUIService {
         printTenants("👥 ALL TENANTS", tenants);
     }
 
-    @Transactional
     private void showAllLeases() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("📄 ALL LEASES");
@@ -280,7 +275,6 @@ public class ConsoleUIService {
         System.out.println("=".repeat(70));
     }
 
-    @Transactional
     private void showAllPayments() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("💵 ALL PAYMENTS");
@@ -304,7 +298,6 @@ public class ConsoleUIService {
         System.out.println("=".repeat(70));
     }
 
-    @Transactional
     private void showMaintenanceRequests() {
         System.out.println("\n" + "=".repeat(70));
         System.out.println("🔧 MAINTENANCE REQUESTS");

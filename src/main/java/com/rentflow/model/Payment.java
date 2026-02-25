@@ -2,6 +2,7 @@ package com.rentflow.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -88,6 +89,21 @@ public class Payment {
 
     public void setLease(Lease lease) {
         this.lease = lease;
+    }
+
+    @JsonProperty("leaseId")
+    public Integer getLeaseId() {
+        return lease != null ? lease.getLeaseId() : null;
+    }
+
+    @JsonProperty("tenantName")
+    public String getTenantName() {
+        return lease != null && lease.getTenant() != null ? lease.getTenant().getFullName() : null;
+    }
+
+    @JsonProperty("propertyAddress")
+    public String getPropertyAddress() {
+        return lease != null && lease.getProperty() != null ? lease.getProperty().getAddress() : null;
     }
 
     public LocalDate getPaymentDate() {

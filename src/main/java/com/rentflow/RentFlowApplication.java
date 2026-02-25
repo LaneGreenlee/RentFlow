@@ -1,12 +1,7 @@
 package com.rentflow;
 
-import com.rentflow.service.ConsoleUIService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.util.Scanner;
 
 /**
  * RentFlow Application - Spring Boot Entry Point
@@ -36,7 +31,6 @@ import java.util.Scanner;
  * ============================================================
  * - REST Layer: Controllers expose HTTP endpoints (e.g., /api/properties)
  * - Business Layer: Services contain core business logic
- * - Presentation Layer: ConsoleUIService handles CLI interaction
  * - Data Layer: Repositories provide database access
  * 
  * ============================================================
@@ -69,11 +63,4 @@ public class RentFlowApplication {
         SpringApplication.run(RentFlowApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner run(ConsoleUIService consoleUIService) {
-        return args -> {
-            Scanner scanner = new Scanner(System.in);
-            consoleUIService.run(scanner);
-        };
-    }
 }

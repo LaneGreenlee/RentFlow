@@ -6,12 +6,13 @@ A professional property management system designed for small landlords (5-10 pro
 
 ## 🎯 Project Purpose
 
-This is a fully-functional Spring Boot application created for CSCE 548. It demonstrates:
+This is a full-stack Spring Boot + React application created for CSCE 548. It demonstrates:
 
 - Professional-grade database design with proper relationships
 - Complete CRUD operations using Spring Data JPA
 - Real-world data scenarios (114 payment records!)
-- Console-based interface for data interaction
+- REST API services consumed by a modern React client
+- Full two-way CRUD from client → API → database
 
 ## 🏗️ Database Structure
 
@@ -40,7 +41,8 @@ The database includes **114 payment records** showing realistic scenarios:
 
 - Java 17 or higher
 - Maven 3.6+
-- MySQL 8.0+ (or PostgreSQL - see instructions below)
+- Node.js 20+ (for the React client)
+- MySQL 8.0+
 - Git
 
 ### Step 1: Install MySQL
@@ -98,7 +100,7 @@ spring.datasource.username=root
 spring.datasource.password=YOUR_ACTUAL_PASSWORD_HERE
 ```
 
-### Step 4: Build and Run
+### Step 4: Build and Run (API Only)
 
 ```bash
 # Navigate to project directory
@@ -107,71 +109,31 @@ cd rentflow-property-manager
 # Build the project
 mvn clean install
 
-# Run the application
+# Run the API (Tomcat on 8080)
 mvn spring-boot:run
+```
+
+### Step 5: Run Full Stack (API + Client)
+
+From the project root:
+
+```bash
+npm install
+npm run dev
 ```
 
 ## 🎮 Using the Application
 
-When you run the app, you'll see a professional menu:
+The **React client** replaces the console UI and provides:
 
-```
-======================================================================
-❄️  RENTFLOW - PROFESSIONAL PROPERTY MANAGEMENT SYSTEM  ❄️
-    Like ice, your data is crystal clear and solid!
-======================================================================
+### Client Features
 
-MAIN MENU
-======================================================================
-1. 💰 PAYMENT TRACKING - Who Owes What
-2. 🏠 View All Properties
-3. 👥 View All Tenants
-4. 📄 View All Leases
-5. 💵 View All Payments
-6. 📊 Payment Summary Report
-7. 🔧 View Maintenance Requests
-8. ⚠️  View Overdue Payments
-9. 🏠 Property Management (CRUD)
-10. 👥 Tenant Management (CRUD)
-11. ✅ Update Maintenance Status
-12. 🚪 Exit
-======================================================================
-```
-
-### Key Features:
-
-**Option 1: Payment Tracking**
-
-- See who owes money
-- See who's paid up
-- Track outstanding balances per tenant
-
-**Option 6: Payment Summary Report**
-
-- Total rent received
-- Total rent expected
-- Collection rate percentage
-- Count of late payments
-
-**Option 8: Overdue Payments**
-
-- See exactly which payments are overdue
-- How many days overdue
-- Amount owed
-
-**Option 10: Property Management (CRUD)**
-
-- List, create, update, delete properties
-- Includes Property Explorer filters (city, state, type, bedrooms, rent range)
-
-**Option 11: Tenant Management (CRUD)**
-
-- List, create, update, delete tenants
-- Update contact info, employment status, income, and emergency contacts
-
-**Option 12: Update Maintenance Status**
-
-- Mark requests as OPEN, IN_PROGRESS, COMPLETED, or CANCELLED
+- Dashboard with quick “Load All” actions
+- Separate pages for Properties, Tenants, Leases, Payments, Maintenance
+- Create / Update / Delete for all entities
+- Full **GET** coverage for all endpoints (single, list, and filtered)
+- Modal popups for updates (no clunky inline forms)
+- Aesthetic card grids for all data lists
 
 ## 🗂️ Project Structure
 
@@ -181,15 +143,18 @@ RentFlow/
 ├── README.md                        # Project documentation
 ├── QUICK_START.md                   # Short setup guide
 ├── PROJECT_SUMMARY.md               # Project overview
+├── package.json                      # Root dev runner (API + Client)
+├── client/                           # React client (Vite)
+│   ├── src/
+│   ├── vite.config.js
+│   └── package.json
 ├── schema.sql                       # Database creation script
 ├── test_data.sql                    # 114 payment records + more
 ├── verify_database.sql              # Verification queries
 ├── src/
 │   └── main/
 │       ├── java/com/rentflow/
-│       │   ├── RentFlowApplication.java      # Spring Boot entry point + console UI
-│       │   ├── client/
-│       │   │   └── ServiceConsoleClient.java # REST service test client
+│       │   ├── RentFlowApplication.java      # Spring Boot entry point
 │       │   ├── controller/                   # REST API layer
 │       │   │   ├── LeaseController.java
 │       │   │   ├── MaintenanceRequestController.java
@@ -263,13 +228,11 @@ The application exposes REST endpoints under `/api`.
 
 Equivalent CRUD endpoints exist for `/api/tenants`, `/api/leases`, `/api/payments`, and `/api/maintenance-requests`.
 
-## 🧪 Console Client (Service Test)
+## 🖥️ React Client (Required for Project 3)
 
-A simple console client is included to test the REST services via HTTP.
-
-- Class: `com.rentflow.client.ServiceConsoleClient`
-- It performs **create → read → update → read → delete → read** against `/api/properties`.
-- Requires the service running at `http://localhost:8080` (or set `RENTFLOW_BASE_URL`).
+- URL: http://localhost:5173
+- API: http://localhost:8080
+- The client calls **all GET endpoints** (single, list, filters) and supports full CRUD.
 
 ## ☁️ Hosting (Example: Render)
 
@@ -286,12 +249,13 @@ This hosts the REST services under `/api/*` on port 8080.
 
 ## 📚 Technologies Used
 
-- **Java 17** - Modern, professional Java
-- **Spring Boot 3.2.1** - Industry-standard framework
-- **Spring Data JPA** - Elegant data access
-- **Hibernate** - ORM for database interaction
-- **MySQL 8.0** - Robust relational database
-- **Maven** - Dependency management
+- **Java 17** - Backend language
+- **Spring Boot 3.2.1** - REST API framework
+- **Spring Data JPA + Hibernate** - ORM
+- **MySQL 8.0** - Database
+- **Maven** - Backend build tool
+- **React + Vite** - Client application
+- **Node.js 20+** - Frontend tooling
 
 ## 📝 License
 
