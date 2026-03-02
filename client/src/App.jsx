@@ -239,6 +239,7 @@ function App() {
   const handleGetPropertyById = async () => {
     try {
       const data = await apiRequest(`/properties/${propertyId}`)
+      setPropertiesList(data ? [data] : [])
       setResult('Property by ID', data)
     } catch (error) {
       setError('Property fetch failed', error)
@@ -267,7 +268,9 @@ function App() {
 
   const handleGetPropertiesByRentRange = async () => {
     try {
-      const query = `?min=${propertyRentRange.min}&max=${propertyRentRange.max}`
+      const minRent = propertyRentRange.min === '' ? 0 : propertyRentRange.min
+      const maxRent = propertyRentRange.max === '' ? 9999999 : propertyRentRange.max
+      const query = `?minRent=${minRent}&maxRent=${maxRent}`
       const data = await apiRequest(`/properties/rent-range${query}`)
       setPropertiesList(Array.isArray(data) ? data : [])
       setResult('Properties by rent range', data)
@@ -313,6 +316,7 @@ function App() {
   const handleGetTenantById = async () => {
     try {
       const data = await apiRequest(`/tenants/${tenantId}`)
+      setTenantsList(data ? [data] : [])
       setResult('Tenant by ID', data)
     } catch (error) {
       setError('Tenant fetch failed', error)
@@ -330,19 +334,31 @@ function App() {
   }
 
   const handleGetTenantByEmail = async () => {
+    if (!tenantEmail.trim()) {
+      setError('Email required', new Error('Please enter an email address'))
+      return
+    }
     try {
       const data = await apiRequest(`/tenants/email/${encodeURIComponent(tenantEmail)}`)
+      setTenantsList(data ? [data] : [])
       setResult('Tenant by email', data)
     } catch (error) {
+      setTenantsList([])
       setError('Tenant by email failed', error)
     }
   }
 
   const handleGetTenantByPhone = async () => {
+    if (!tenantPhone.trim()) {
+      setError('Phone required', new Error('Please enter a phone number'))
+      return
+    }
     try {
       const data = await apiRequest(`/tenants/phone/${encodeURIComponent(tenantPhone)}`)
+      setTenantsList(data ? [data] : [])
       setResult('Tenant by phone', data)
     } catch (error) {
+      setTenantsList([])
       setError('Tenant by phone failed', error)
     }
   }
@@ -350,6 +366,7 @@ function App() {
   const handleGetTenantsByEmployment = async () => {
     try {
       const data = await apiRequest(`/tenants/employment/${tenantEmployment}`)
+      setTenantsList(Array.isArray(data) ? data : [])
       setResult('Tenants by employment', data)
     } catch (error) {
       setError('Tenants by employment failed', error)
@@ -359,6 +376,7 @@ function App() {
   const handleSearchTenants = async () => {
     try {
       const data = await apiRequest(`/tenants/search?name=${encodeURIComponent(tenantSearch)}`)
+      setTenantsList(Array.isArray(data) ? data : [])
       setResult('Tenant search results', data)
     } catch (error) {
       setError('Tenant search failed', error)
@@ -402,6 +420,7 @@ function App() {
   const handleGetLeaseById = async () => {
     try {
       const data = await apiRequest(`/leases/${leaseId}`)
+      setLeasesList(data ? [data] : [])
       setResult('Lease by ID', data)
     } catch (error) {
       setError('Lease fetch failed', error)
@@ -421,6 +440,7 @@ function App() {
   const handleGetLeasesByProperty = async () => {
     try {
       const data = await apiRequest(`/leases/property/${leasePropertyId}`)
+      setLeasesList(Array.isArray(data) ? data : [])
       setResult('Leases by property', data)
     } catch (error) {
       setError('Leases by property failed', error)
@@ -430,6 +450,7 @@ function App() {
   const handleGetLeasesByTenant = async () => {
     try {
       const data = await apiRequest(`/leases/tenant/${leaseTenantId}`)
+      setLeasesList(Array.isArray(data) ? data : [])
       setResult('Leases by tenant', data)
     } catch (error) {
       setError('Leases by tenant failed', error)
@@ -439,6 +460,7 @@ function App() {
   const handleGetLeasesByStatus = async () => {
     try {
       const data = await apiRequest(`/leases/status/${leaseStatus}`)
+      setLeasesList(Array.isArray(data) ? data : [])
       setResult('Leases by status', data)
     } catch (error) {
       setError('Leases by status failed', error)
@@ -448,6 +470,7 @@ function App() {
   const handleGetActiveLeases = async () => {
     try {
       const data = await apiRequest('/leases/active')
+      setLeasesList(Array.isArray(data) ? data : [])
       setResult('Active leases', data)
     } catch (error) {
       setError('Active leases failed', error)
@@ -457,6 +480,7 @@ function App() {
   const handleGetLeasesExpiringSoon = async () => {
     try {
       const data = await apiRequest(`/leases/expiring-soon?days=${leaseExpiringDays}`)
+      setLeasesList(Array.isArray(data) ? data : [])
       setResult('Leases expiring soon', data)
     } catch (error) {
       setError('Expiring leases failed', error)
@@ -500,6 +524,7 @@ function App() {
   const handleGetPaymentById = async () => {
     try {
       const data = await apiRequest(`/payments/${paymentId}`)
+      setPaymentsList(data ? [data] : [])
       setResult('Payment by ID', data)
     } catch (error) {
       setError('Payment fetch failed', error)
@@ -519,6 +544,7 @@ function App() {
   const handleGetPaymentsByLease = async () => {
     try {
       const data = await apiRequest(`/payments/lease/${paymentLeaseId}`)
+      setPaymentsList(Array.isArray(data) ? data : [])
       setResult('Payments by lease', data)
     } catch (error) {
       setError('Payments by lease failed', error)
@@ -528,6 +554,7 @@ function App() {
   const handleGetPaymentsByStatus = async () => {
     try {
       const data = await apiRequest(`/payments/status/${paymentStatus}`)
+      setPaymentsList(Array.isArray(data) ? data : [])
       setResult('Payments by status', data)
     } catch (error) {
       setError('Payments by status failed', error)
@@ -537,6 +564,7 @@ function App() {
   const handleGetOverduePayments = async () => {
     try {
       const data = await apiRequest('/payments/overdue')
+      setPaymentsList(Array.isArray(data) ? data : [])
       setResult('Overdue payments', data)
     } catch (error) {
       setError('Overdue payments failed', error)
@@ -547,6 +575,7 @@ function App() {
     try {
       const query = `?startDate=${paymentDateRange.startDate}&endDate=${paymentDateRange.endDate}`
       const data = await apiRequest(`/payments/date-range${query}`)
+      setPaymentsList(Array.isArray(data) ? data : [])
       setResult('Payments by date range', data)
     } catch (error) {
       setError('Payments by date range failed', error)
@@ -599,6 +628,7 @@ function App() {
   const handleGetMaintenanceById = async () => {
     try {
       const data = await apiRequest(`/maintenance-requests/${maintenanceId}`)
+      setMaintenanceList(data ? [data] : [])
       setResult('Maintenance request by ID', data)
     } catch (error) {
       setError('Maintenance fetch failed', error)
@@ -618,6 +648,7 @@ function App() {
   const handleGetMaintenanceByProperty = async () => {
     try {
       const data = await apiRequest(`/maintenance-requests/property/${maintenancePropertyId}`)
+      setMaintenanceList(Array.isArray(data) ? data : [])
       setResult('Maintenance by property', data)
     } catch (error) {
       setError('Maintenance by property failed', error)
@@ -627,6 +658,7 @@ function App() {
   const handleGetMaintenanceByStatus = async () => {
     try {
       const data = await apiRequest(`/maintenance-requests/status/${maintenanceStatus}`)
+      setMaintenanceList(Array.isArray(data) ? data : [])
       setResult('Maintenance by status', data)
     } catch (error) {
       setError('Maintenance by status failed', error)
@@ -636,6 +668,7 @@ function App() {
   const handleGetMaintenanceByPriority = async () => {
     try {
       const data = await apiRequest(`/maintenance-requests/priority/${maintenancePriority}`)
+      setMaintenanceList(Array.isArray(data) ? data : [])
       setResult('Maintenance by priority', data)
     } catch (error) {
       setError('Maintenance by priority failed', error)
@@ -645,6 +678,7 @@ function App() {
   const handleGetPendingMaintenance = async () => {
     try {
       const data = await apiRequest('/maintenance-requests/pending')
+      setMaintenanceList(Array.isArray(data) ? data : [])
       setResult('Pending maintenance', data)
     } catch (error) {
       setError('Pending maintenance failed', error)
@@ -654,6 +688,7 @@ function App() {
   const handleGetUrgentMaintenance = async () => {
     try {
       const data = await apiRequest('/maintenance-requests/urgent')
+      setMaintenanceList(Array.isArray(data) ? data : [])
       setResult('Urgent maintenance', data)
     } catch (error) {
       setError('Urgent maintenance failed', error)
