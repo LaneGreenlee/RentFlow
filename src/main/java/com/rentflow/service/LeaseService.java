@@ -2,7 +2,11 @@ package com.rentflow.service;
 
 import com.rentflow.model.Lease;
 import com.rentflow.model.LeaseStatus;
+import com.rentflow.model.Property;
+import com.rentflow.model.Tenant;
 import com.rentflow.repository.LeaseRepository;
+import com.rentflow.repository.PropertyRepository;
+import com.rentflow.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +24,15 @@ import java.util.Optional;
 public class LeaseService {
 
     private final LeaseRepository leaseRepository;
+    private final PropertyRepository propertyRepository;
+    private final TenantRepository tenantRepository;
 
     @Autowired
-    public LeaseService(LeaseRepository leaseRepository) {
+    public LeaseService(LeaseRepository leaseRepository, PropertyRepository propertyRepository,
+            TenantRepository tenantRepository) {
         this.leaseRepository = leaseRepository;
+        this.propertyRepository = propertyRepository;
+        this.tenantRepository = tenantRepository;
     }
 
     /**
@@ -33,6 +42,22 @@ public class LeaseService {
      * @return Created lease with generated ID
      */
     public Lease createLease(Lease lease) {
+        // Fetch and set Property entity if only ID is provided
+        if (lease.getProperty() != null && lease.getProperty().getPropertyId() != null) {
+            Property property = propertyRepository.findById(lease.getProperty().getPropertyId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Property not found with id: " + lease.getProperty().getPropertyId()));
+            lease.setProperty(property);
+        }
+
+        // Fetch and set Tenant entity if only ID is provided
+        if (lease.getTenant() != null && lease.getTenant().getTenantId() != null) {
+            Tenant tenant = tenantRepository.findById(lease.getTenant().getTenantId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Tenant not found with id: " + lease.getTenant().getTenantId()));
+            lease.setTenant(tenant);
+        }
+
         return leaseRepository.save(lease);
     }
 
@@ -43,6 +68,22 @@ public class LeaseService {
      * @return Updated lease
      */
     public Lease updateLease(Lease lease) {
+        // Fetch and set Property entity if only ID is provided
+        if (lease.getProperty() != null && lease.getProperty().getPropertyId() != null) {
+            Property property = propertyRepository.findById(lease.getProperty().getPropertyId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Property not found with id: " + lease.getProperty().getPropertyId()));
+            lease.setProperty(property);
+        }
+
+        // Fetch and set Tenant entity if only ID is provided
+        if (lease.getTenant() != null && lease.getTenant().getTenantId() != null) {
+            Tenant tenant = tenantRepository.findById(lease.getTenant().getTenantId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Tenant not found with id: " + lease.getTenant().getTenantId()));
+            lease.setTenant(tenant);
+        }
+
         return leaseRepository.save(lease);
     }
 

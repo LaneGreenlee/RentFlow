@@ -1,7 +1,9 @@
 package com.rentflow.service;
 
+import com.rentflow.model.Lease;
 import com.rentflow.model.Payment;
 import com.rentflow.model.PaymentStatus;
+import com.rentflow.repository.LeaseRepository;
 import com.rentflow.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,12 @@ import java.util.Optional;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final LeaseRepository leaseRepository;
 
     @Autowired
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, LeaseRepository leaseRepository) {
         this.paymentRepository = paymentRepository;
+        this.leaseRepository = leaseRepository;
     }
 
     /**
@@ -34,6 +38,14 @@ public class PaymentService {
      * @return Created payment with generated ID
      */
     public Payment createPayment(Payment payment) {
+        // Fetch and set Lease entity if only ID is provided
+        if (payment.getLease() != null && payment.getLease().getLeaseId() != null) {
+            Lease lease = leaseRepository.findById(payment.getLease().getLeaseId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Lease not found with id: " + payment.getLease().getLeaseId()));
+            payment.setLease(lease);
+        }
+
         return paymentRepository.save(payment);
     }
 
@@ -44,6 +56,14 @@ public class PaymentService {
      * @return Updated payment
      */
     public Payment updatePayment(Payment payment) {
+        // Fetch and set Lease entity if only ID is provided
+        if (payment.getLease() != null && payment.getLease().getLeaseId() != null) {
+            Lease lease = leaseRepository.findById(payment.getLease().getLeaseId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Lease not found with id: " + payment.getLease().getLeaseId()));
+            payment.setLease(lease);
+        }
+
         return paymentRepository.save(payment);
     }
 

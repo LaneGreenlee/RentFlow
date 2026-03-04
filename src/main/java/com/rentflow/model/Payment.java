@@ -96,6 +96,14 @@ public class Payment {
         return lease != null ? lease.getLeaseId() : null;
     }
 
+    @JsonProperty("leaseId")
+    public void setLeaseId(Integer leaseId) {
+        if (leaseId != null) {
+            this.lease = new Lease();
+            this.lease.setLeaseId(leaseId);
+        }
+    }
+
     @JsonProperty("tenantName")
     public String getTenantName() {
         return lease != null && lease.getTenant() != null ? lease.getTenant().getFullName() : null;

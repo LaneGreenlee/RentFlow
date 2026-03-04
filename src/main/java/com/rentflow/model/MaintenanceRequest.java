@@ -111,6 +111,14 @@ public class MaintenanceRequest {
         return property != null ? property.getPropertyId() : null;
     }
 
+    @JsonProperty("propertyId")
+    public void setPropertyId(Integer propertyId) {
+        if (propertyId != null) {
+            this.property = new Property();
+            this.property.setPropertyId(propertyId);
+        }
+    }
+
     @JsonProperty("propertyAddress")
     public String getPropertyAddress() {
         return property != null ? property.getAddress() : null;
@@ -119,6 +127,14 @@ public class MaintenanceRequest {
     @JsonProperty("tenantId")
     public Integer getTenantId() {
         return tenant != null ? tenant.getTenantId() : null;
+    }
+
+    @JsonProperty("tenantId")
+    public void setTenantId(Integer tenantId) {
+        if (tenantId != null) {
+            this.tenant = new Tenant();
+            this.tenant.setTenantId(tenantId);
+        }
     }
 
     @JsonProperty("tenantName")

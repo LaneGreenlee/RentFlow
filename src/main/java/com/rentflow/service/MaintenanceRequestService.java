@@ -3,7 +3,11 @@ package com.rentflow.service;
 import com.rentflow.model.MaintenanceRequest;
 import com.rentflow.model.MaintenanceStatus;
 import com.rentflow.model.Priority;
+import com.rentflow.model.Property;
+import com.rentflow.model.Tenant;
 import com.rentflow.repository.MaintenanceRequestRepository;
+import com.rentflow.repository.PropertyRepository;
+import com.rentflow.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +25,16 @@ import java.util.Optional;
 public class MaintenanceRequestService {
 
     private final MaintenanceRequestRepository maintenanceRequestRepository;
+    private final PropertyRepository propertyRepository;
+    private final TenantRepository tenantRepository;
 
     @Autowired
-    public MaintenanceRequestService(MaintenanceRequestRepository maintenanceRequestRepository) {
+    public MaintenanceRequestService(MaintenanceRequestRepository maintenanceRequestRepository,
+            PropertyRepository propertyRepository,
+            TenantRepository tenantRepository) {
         this.maintenanceRequestRepository = maintenanceRequestRepository;
+        this.propertyRepository = propertyRepository;
+        this.tenantRepository = tenantRepository;
     }
 
     /**
@@ -34,6 +44,22 @@ public class MaintenanceRequestService {
      * @return Created maintenance request with generated ID
      */
     public MaintenanceRequest createMaintenanceRequest(MaintenanceRequest maintenanceRequest) {
+        // Fetch and set Property entity if only ID is provided
+        if (maintenanceRequest.getProperty() != null && maintenanceRequest.getProperty().getPropertyId() != null) {
+            Property property = propertyRepository.findById(maintenanceRequest.getProperty().getPropertyId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Property not found with id: " + maintenanceRequest.getProperty().getPropertyId()));
+            maintenanceRequest.setProperty(property);
+        }
+
+        // Fetch and set Tenant entity if only ID is provided (tenant is optional)
+        if (maintenanceRequest.getTenant() != null && maintenanceRequest.getTenant().getTenantId() != null) {
+            Tenant tenant = tenantRepository.findById(maintenanceRequest.getTenant().getTenantId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Tenant not found with id: " + maintenanceRequest.getTenant().getTenantId()));
+            maintenanceRequest.setTenant(tenant);
+        }
+
         return maintenanceRequestRepository.save(maintenanceRequest);
     }
 
@@ -44,6 +70,22 @@ public class MaintenanceRequestService {
      * @return Updated maintenance request
      */
     public MaintenanceRequest updateMaintenanceRequest(MaintenanceRequest maintenanceRequest) {
+        // Fetch and set Property entity if only ID is provided
+        if (maintenanceRequest.getProperty() != null && maintenanceRequest.getProperty().getPropertyId() != null) {
+            Property property = propertyRepository.findById(maintenanceRequest.getProperty().getPropertyId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Property not found with id: " + maintenanceRequest.getProperty().getPropertyId()));
+            maintenanceRequest.setProperty(property);
+        }
+
+        // Fetch and set Tenant entity if only ID is provided (tenant is optional)
+        if (maintenanceRequest.getTenant() != null && maintenanceRequest.getTenant().getTenantId() != null) {
+            Tenant tenant = tenantRepository.findById(maintenanceRequest.getTenant().getTenantId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Tenant not found with id: " + maintenanceRequest.getTenant().getTenantId()));
+            maintenanceRequest.setTenant(tenant);
+        }
+
         return maintenanceRequestRepository.save(maintenanceRequest);
     }
 

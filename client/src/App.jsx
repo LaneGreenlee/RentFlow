@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE || '/api'
@@ -41,6 +41,7 @@ function App() {
   const [activePage, setActivePage] = useState('dashboard')
   const [activeModal, setActiveModal] = useState(null)
   const [output, setOutput] = useState({ title: 'Ready', data: null, error: null })
+  const [notification, setNotification] = useState(null)
 
   const [propertiesList, setPropertiesList] = useState([])
   const [tenantsList, setTenantsList] = useState([])
@@ -63,7 +64,7 @@ function App() {
   })
   const [propertyUpdate, setPropertyUpdate] = useState({ id: '', ...propertyCreate })
   const [propertyId, setPropertyId] = useState('')
-  const [propertyType, setPropertyType] = useState('APARTMENT')
+  const [propertyType, setPropertyType] = useState('')
   const [propertyRentRange, setPropertyRentRange] = useState({ min: '', max: '' })
 
   const [tenantCreate, setTenantCreate] = useState({
@@ -82,7 +83,7 @@ function App() {
   const [tenantId, setTenantId] = useState('')
   const [tenantEmail, setTenantEmail] = useState('')
   const [tenantPhone, setTenantPhone] = useState('')
-  const [tenantEmployment, setTenantEmployment] = useState('EMPLOYED')
+  const [tenantEmployment, setTenantEmployment] = useState('')
   const [tenantSearch, setTenantSearch] = useState('')
 
   const [leaseCreate, setLeaseCreate] = useState({
@@ -99,7 +100,7 @@ function App() {
   const [leaseId, setLeaseId] = useState('')
   const [leasePropertyId, setLeasePropertyId] = useState('')
   const [leaseTenantId, setLeaseTenantId] = useState('')
-  const [leaseStatus, setLeaseStatus] = useState('ACTIVE')
+  const [leaseStatus, setLeaseStatus] = useState('')
   const [leaseExpiringDays, setLeaseExpiringDays] = useState('30')
 
   const [paymentCreate, setPaymentCreate] = useState({
@@ -115,7 +116,7 @@ function App() {
   const [paymentUpdate, setPaymentUpdate] = useState({ id: '', ...paymentCreate })
   const [paymentId, setPaymentId] = useState('')
   const [paymentLeaseId, setPaymentLeaseId] = useState('')
-  const [paymentStatus, setPaymentStatus] = useState('COMPLETED')
+  const [paymentStatus, setPaymentStatus] = useState('')
   const [paymentDateRange, setPaymentDateRange] = useState({ startDate: '', endDate: '' })
   const [paymentTotalLeaseId, setPaymentTotalLeaseId] = useState('')
 
@@ -134,11 +135,19 @@ function App() {
   const [maintenanceUpdate, setMaintenanceUpdate] = useState({ id: '', ...maintenanceCreate })
   const [maintenanceId, setMaintenanceId] = useState('')
   const [maintenancePropertyId, setMaintenancePropertyId] = useState('')
-  const [maintenanceStatus, setMaintenanceStatus] = useState('OPEN')
-  const [maintenancePriority, setMaintenancePriority] = useState('MEDIUM')
+  const [maintenanceStatus, setMaintenanceStatus] = useState('')
+  const [maintenancePriority, setMaintenancePriority] = useState('')
 
-  const setResult = (title, data) => setOutput({ title, data, error: null })
-  const setError = (title, error) => setOutput({ title, data: null, error: error.message })
+  const setResult = (title, data) => {
+    setOutput({ title, data, error: null })
+    setNotification({ type: 'success', message: title })
+    setTimeout(() => setNotification(null), 4000)
+  }
+  const setError = (title, error) => {
+    setOutput({ title, data: null, error: error.message })
+    setNotification({ type: 'error', message: `${title}: ${error.message}` })
+    setTimeout(() => setNotification(null), 4000)
+  }
 
   const buildPropertyPayload = (form) => ({
     address: form.address,
@@ -168,8 +177,8 @@ function App() {
   })
 
   const buildLeasePayload = (form) => ({
-    property: { propertyId: toInt(form.propertyId) },
-    tenant: { tenantId: toInt(form.tenantId) },
+    propertyId: toInt(form.propertyId),
+    tenantId: toInt(form.tenantId),
     startDate: emptyToNull(form.startDate),
     endDate: emptyToNull(form.endDate),
     monthlyRent: toFloat(form.monthlyRent),
@@ -179,7 +188,7 @@ function App() {
   })
 
   const buildPaymentPayload = (form) => ({
-    lease: { leaseId: toInt(form.leaseId) },
+    leaseId: toInt(form.leaseId),
     paymentDate: emptyToNull(form.paymentDate),
     amount: toFloat(form.amount),
     paymentType: emptyToNull(form.paymentType),
@@ -190,8 +199,8 @@ function App() {
   })
 
   const buildMaintenancePayload = (form) => ({
-    property: { propertyId: toInt(form.propertyId) },
-    tenant: form.tenantId ? { tenantId: toInt(form.tenantId) } : null,
+    propertyId: toInt(form.propertyId),
+    tenantId: form.tenantId ? toInt(form.tenantId) : null,
     requestDate: emptyToNull(form.requestDate),
     description: form.description,
     priority: emptyToNull(form.priority),
@@ -202,13 +211,35 @@ function App() {
     notes: emptyToNull(form.notes),
   })
 
+  // Load all data on mount for dropdown selects
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [properties, tenants, leases] = await Promise.all([
+          apiRequest('/properties'),
+          apiRequest('/tenants'),
+          apiRequest('/leases'),
+        ])
+        setPropertiesList(Array.isArray(properties) ? properties : [])
+        setTenantsList(Array.isArray(tenants) ? tenants : [])
+        setLeasesList(Array.isArray(leases) ? leases : [])
+      } catch (error) {
+        console.error('Failed to load initial data:', error)
+      }
+    }
+    loadInitialData()
+  }, [])
+
   const handleCreateProperty = async () => {
     try {
       const data = await apiRequest('/properties', {
         method: 'POST',
         body: JSON.stringify(buildPropertyPayload(propertyCreate)),
       })
-      setResult('Property created', data)
+      setResult('Property created successfully', data)
+      // Refresh properties list for dropdowns
+      const properties = await apiRequest('/properties')
+      setPropertiesList(Array.isArray(properties) ? properties : [])
     } catch (error) {
       setError('Property create failed', error)
     }
@@ -220,7 +251,7 @@ function App() {
         method: 'PUT',
         body: JSON.stringify(buildPropertyPayload(propertyUpdate)),
       })
-      setResult('Property updated', data)
+      setResult('Property updated successfully', data)
       setActiveModal(null)
     } catch (error) {
       setError('Property update failed', error)
@@ -230,7 +261,7 @@ function App() {
   const handleDeleteProperty = async () => {
     try {
       const data = await apiRequest(`/properties/${propertyId}`, { method: 'DELETE' })
-      setResult('Property deleted', data)
+      setResult('Property deleted successfully', data)
     } catch (error) {
       setError('Property delete failed', error)
     }
@@ -240,7 +271,8 @@ function App() {
     try {
       const data = await apiRequest(`/properties/${propertyId}`)
       setPropertiesList(data ? [data] : [])
-      setResult('Property by ID', data)
+      setResult(`Found property ID: ${propertyId}`, data)
+      setPropertyId('')
     } catch (error) {
       setError('Property fetch failed', error)
     }
@@ -250,17 +282,23 @@ function App() {
     try {
       const data = await apiRequest('/properties')
       setPropertiesList(Array.isArray(data) ? data : [])
-      setResult('All properties', data)
+      setResult(`Retrieved ${Array.isArray(data) ? data.length : 0} properties`, data)
     } catch (error) {
       setError('Properties fetch failed', error)
     }
   }
 
   const handleGetPropertiesByType = async () => {
+    if (!propertyType) {
+      setError('Selection required', new Error('Please select a property type'))
+      return
+    }
+    const selectedType = propertyType
     try {
-      const data = await apiRequest(`/properties/type/${propertyType}`)
+      const data = await apiRequest(`/properties/type/${selectedType}`)
       setPropertiesList(Array.isArray(data) ? data : [])
-      setResult('Properties by type', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} properties with type: ${selectedType}`, data)
+      setPropertyType('')
     } catch (error) {
       setError('Properties by type failed', error)
     }
@@ -273,7 +311,8 @@ function App() {
       const query = `?minRent=${minRent}&maxRent=${maxRent}`
       const data = await apiRequest(`/properties/rent-range${query}`)
       setPropertiesList(Array.isArray(data) ? data : [])
-      setResult('Properties by rent range', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} properties: $${minRent} - $${maxRent}/month`, data)
+      setPropertyRentRange({ min: '', max: '' })
     } catch (error) {
       setError('Properties by rent range failed', error)
     }
@@ -286,6 +325,9 @@ function App() {
         body: JSON.stringify(buildTenantPayload(tenantCreate)),
       })
       setResult('Tenant created', data)
+      // Refresh tenants list for dropdowns
+      const tenants = await apiRequest('/tenants')
+      setTenantsList(Array.isArray(tenants) ? tenants : [])
     } catch (error) {
       setError('Tenant create failed', error)
     }
@@ -317,7 +359,8 @@ function App() {
     try {
       const data = await apiRequest(`/tenants/${tenantId}`)
       setTenantsList(data ? [data] : [])
-      setResult('Tenant by ID', data)
+      setResult(`Found tenant ID: ${tenantId}`, data)
+      setTenantId('')
     } catch (error) {
       setError('Tenant fetch failed', error)
     }
@@ -327,7 +370,7 @@ function App() {
     try {
       const data = await apiRequest('/tenants')
       setTenantsList(Array.isArray(data) ? data : [])
-      setResult('All tenants', data)
+      setResult(`Retrieved ${Array.isArray(data) ? data.length : 0} tenants`, data)
     } catch (error) {
       setError('Tenants fetch failed', error)
     }
@@ -338,10 +381,12 @@ function App() {
       setError('Email required', new Error('Please enter an email address'))
       return
     }
+    const searchEmail = tenantEmail
     try {
-      const data = await apiRequest(`/tenants/email/${encodeURIComponent(tenantEmail)}`)
+      const data = await apiRequest(`/tenants/email/${encodeURIComponent(searchEmail)}`)
       setTenantsList(data ? [data] : [])
-      setResult('Tenant by email', data)
+      setResult(`Found tenant with email: ${searchEmail}`, data)
+      setTenantEmail('')
     } catch (error) {
       setTenantsList([])
       setError('Tenant by email failed', error)
@@ -353,10 +398,12 @@ function App() {
       setError('Phone required', new Error('Please enter a phone number'))
       return
     }
+    const searchPhone = tenantPhone
     try {
-      const data = await apiRequest(`/tenants/phone/${encodeURIComponent(tenantPhone)}`)
+      const data = await apiRequest(`/tenants/phone/${encodeURIComponent(searchPhone)}`)
       setTenantsList(data ? [data] : [])
-      setResult('Tenant by phone', data)
+      setResult(`Found tenant with phone: ${searchPhone}`, data)
+      setTenantPhone('')
     } catch (error) {
       setTenantsList([])
       setError('Tenant by phone failed', error)
@@ -364,20 +411,28 @@ function App() {
   }
 
   const handleGetTenantsByEmployment = async () => {
+    if (!tenantEmployment) {
+      setError('Selection required', new Error('Please select an employment status'))
+      return
+    }
+    const selectedEmployment = tenantEmployment
     try {
-      const data = await apiRequest(`/tenants/employment/${tenantEmployment}`)
+      const data = await apiRequest(`/tenants/employment/${selectedEmployment}`)
       setTenantsList(Array.isArray(data) ? data : [])
-      setResult('Tenants by employment', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} tenants with employment: ${selectedEmployment}`, data)
+      setTenantEmployment('')
     } catch (error) {
       setError('Tenants by employment failed', error)
     }
   }
 
   const handleSearchTenants = async () => {
+    const searchTerm = tenantSearch
     try {
-      const data = await apiRequest(`/tenants/search?name=${encodeURIComponent(tenantSearch)}`)
+      const data = await apiRequest(`/tenants/search?name=${encodeURIComponent(searchTerm)}`)
       setTenantsList(Array.isArray(data) ? data : [])
-      setResult('Tenant search results', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} tenants matching: "${searchTerm}"`, data)
+      setTenantSearch('')
     } catch (error) {
       setError('Tenant search failed', error)
     }
@@ -390,6 +445,9 @@ function App() {
         body: JSON.stringify(buildLeasePayload(leaseCreate)),
       })
       setResult('Lease created', data)
+      // Refresh leases list for dropdowns
+      const leases = await apiRequest('/leases')
+      setLeasesList(Array.isArray(leases) ? leases : [])
     } catch (error) {
       setError('Lease create failed', error)
     }
@@ -421,7 +479,8 @@ function App() {
     try {
       const data = await apiRequest(`/leases/${leaseId}`)
       setLeasesList(data ? [data] : [])
-      setResult('Lease by ID', data)
+      setResult(`Found lease ID: ${leaseId}`, data)
+      setLeaseId('')
     } catch (error) {
       setError('Lease fetch failed', error)
     }
@@ -431,37 +490,47 @@ function App() {
     try {
       const data = await apiRequest('/leases')
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('All leases', data)
+      setResult(`Retrieved ${Array.isArray(data) ? data.length : 0} leases`, data)
     } catch (error) {
       setError('Leases fetch failed', error)
     }
   }
 
   const handleGetLeasesByProperty = async () => {
+    const searchPropertyId = leasePropertyId
     try {
-      const data = await apiRequest(`/leases/property/${leasePropertyId}`)
+      const data = await apiRequest(`/leases/property/${searchPropertyId}`)
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('Leases by property', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} leases for property ID: ${searchPropertyId}`, data)
+      setLeasePropertyId('')
     } catch (error) {
       setError('Leases by property failed', error)
     }
   }
 
   const handleGetLeasesByTenant = async () => {
+    const searchTenantId = leaseTenantId
     try {
-      const data = await apiRequest(`/leases/tenant/${leaseTenantId}`)
+      const data = await apiRequest(`/leases/tenant/${searchTenantId}`)
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('Leases by tenant', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} leases for tenant ID: ${searchTenantId}`, data)
+      setLeaseTenantId('')
     } catch (error) {
       setError('Leases by tenant failed', error)
     }
   }
 
   const handleGetLeasesByStatus = async () => {
+    if (!leaseStatus) {
+      setError('Selection required', new Error('Please select a lease status'))
+      return
+    }
+    const selectedStatus = leaseStatus
     try {
-      const data = await apiRequest(`/leases/status/${leaseStatus}`)
+      const data = await apiRequest(`/leases/status/${selectedStatus}`)
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('Leases by status', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} leases with status: ${selectedStatus}`, data)
+      setLeaseStatus('')
     } catch (error) {
       setError('Leases by status failed', error)
     }
@@ -471,17 +540,19 @@ function App() {
     try {
       const data = await apiRequest('/leases/active')
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('Active leases', data)
+      setResult(`Active leases: ${Array.isArray(data) ? data.length : 0} found`, data)
     } catch (error) {
       setError('Active leases failed', error)
     }
   }
 
   const handleGetLeasesExpiringSoon = async () => {
+    const days = leaseExpiringDays
     try {
-      const data = await apiRequest(`/leases/expiring-soon?days=${leaseExpiringDays}`)
+      const data = await apiRequest(`/leases/expiring-soon?days=${days}`)
       setLeasesList(Array.isArray(data) ? data : [])
-      setResult('Leases expiring soon', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} leases expiring within ${days} days`, data)
+      setLeaseExpiringDays('30')
     } catch (error) {
       setError('Expiring leases failed', error)
     }
@@ -525,7 +596,8 @@ function App() {
     try {
       const data = await apiRequest(`/payments/${paymentId}`)
       setPaymentsList(data ? [data] : [])
-      setResult('Payment by ID', data)
+      setResult(`Found payment ID: ${paymentId}`, data)
+      setPaymentId('')
     } catch (error) {
       setError('Payment fetch failed', error)
     }
@@ -535,27 +607,35 @@ function App() {
     try {
       const data = await apiRequest('/payments')
       setPaymentsList(Array.isArray(data) ? data : [])
-      setResult('All payments', data)
+      setResult(`Retrieved ${Array.isArray(data) ? data.length : 0} payments`, data)
     } catch (error) {
       setError('Payments fetch failed', error)
     }
   }
 
   const handleGetPaymentsByLease = async () => {
+    const searchLeaseId = paymentLeaseId
     try {
-      const data = await apiRequest(`/payments/lease/${paymentLeaseId}`)
+      const data = await apiRequest(`/payments/lease/${searchLeaseId}`)
       setPaymentsList(Array.isArray(data) ? data : [])
-      setResult('Payments by lease', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} payments for lease ID: ${searchLeaseId}`, data)
+      setPaymentLeaseId('')
     } catch (error) {
       setError('Payments by lease failed', error)
     }
   }
 
   const handleGetPaymentsByStatus = async () => {
+    if (!paymentStatus) {
+      setError('Selection required', new Error('Please select a payment status'))
+      return
+    }
+    const selectedStatus = paymentStatus
     try {
-      const data = await apiRequest(`/payments/status/${paymentStatus}`)
+      const data = await apiRequest(`/payments/status/${selectedStatus}`)
       setPaymentsList(Array.isArray(data) ? data : [])
-      setResult('Payments by status', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} payments with status: ${selectedStatus}`, data)
+      setPaymentStatus('')
     } catch (error) {
       setError('Payments by status failed', error)
     }
@@ -565,18 +645,21 @@ function App() {
     try {
       const data = await apiRequest('/payments/overdue')
       setPaymentsList(Array.isArray(data) ? data : [])
-      setResult('Overdue payments', data)
+      setResult(`Overdue payments: ${Array.isArray(data) ? data.length : 0} found`, data)
     } catch (error) {
       setError('Overdue payments failed', error)
     }
   }
 
   const handleGetPaymentsByDateRange = async () => {
+    const startDate = paymentDateRange.startDate
+    const endDate = paymentDateRange.endDate
     try {
-      const query = `?startDate=${paymentDateRange.startDate}&endDate=${paymentDateRange.endDate}`
+      const query = `?startDate=${startDate}&endDate=${endDate}`
       const data = await apiRequest(`/payments/date-range${query}`)
       setPaymentsList(Array.isArray(data) ? data : [])
-      setResult('Payments by date range', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} payments: ${startDate} to ${endDate}`, data)
+      setPaymentDateRange({ startDate: '', endDate: '' })
     } catch (error) {
       setError('Payments by date range failed', error)
     }
@@ -629,7 +712,8 @@ function App() {
     try {
       const data = await apiRequest(`/maintenance-requests/${maintenanceId}`)
       setMaintenanceList(data ? [data] : [])
-      setResult('Maintenance request by ID', data)
+      setResult(`Found maintenance request ID: ${maintenanceId}`, data)
+      setMaintenanceId('')
     } catch (error) {
       setError('Maintenance fetch failed', error)
     }
@@ -639,37 +723,51 @@ function App() {
     try {
       const data = await apiRequest('/maintenance-requests')
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('All maintenance requests', data)
+      setResult(`Retrieved ${Array.isArray(data) ? data.length : 0} maintenance requests`, data)
     } catch (error) {
       setError('Maintenance fetch failed', error)
     }
   }
 
   const handleGetMaintenanceByProperty = async () => {
+    const searchPropertyId = maintenancePropertyId
     try {
-      const data = await apiRequest(`/maintenance-requests/property/${maintenancePropertyId}`)
+      const data = await apiRequest(`/maintenance-requests/property/${searchPropertyId}`)
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('Maintenance by property', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} maintenance requests for property ID: ${searchPropertyId}`, data)
+      setMaintenancePropertyId('')
     } catch (error) {
       setError('Maintenance by property failed', error)
     }
   }
 
   const handleGetMaintenanceByStatus = async () => {
+    if (!maintenanceStatus) {
+      setError('Selection required', new Error('Please select a maintenance status'))
+      return
+    }
+    const selectedStatus = maintenanceStatus
     try {
-      const data = await apiRequest(`/maintenance-requests/status/${maintenanceStatus}`)
+      const data = await apiRequest(`/maintenance-requests/status/${selectedStatus}`)
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('Maintenance by status', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} maintenance requests with status: ${selectedStatus}`, data)
+      setMaintenanceStatus('')
     } catch (error) {
       setError('Maintenance by status failed', error)
     }
   }
 
   const handleGetMaintenanceByPriority = async () => {
+    if (!maintenancePriority) {
+      setError('Selection required', new Error('Please select a priority level'))
+      return
+    }
+    const selectedPriority = maintenancePriority
     try {
-      const data = await apiRequest(`/maintenance-requests/priority/${maintenancePriority}`)
+      const data = await apiRequest(`/maintenance-requests/priority/${selectedPriority}`)
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('Maintenance by priority', data)
+      setResult(`Found ${Array.isArray(data) ? data.length : 0} maintenance requests with priority: ${selectedPriority}`, data)
+      setMaintenancePriority('')
     } catch (error) {
       setError('Maintenance by priority failed', error)
     }
@@ -679,7 +777,7 @@ function App() {
     try {
       const data = await apiRequest('/maintenance-requests/pending')
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('Pending maintenance', data)
+      setResult(`Pending maintenance: ${Array.isArray(data) ? data.length : 0} found`, data)
     } catch (error) {
       setError('Pending maintenance failed', error)
     }
@@ -689,7 +787,7 @@ function App() {
     try {
       const data = await apiRequest('/maintenance-requests/urgent')
       setMaintenanceList(Array.isArray(data) ? data : [])
-      setResult('Urgent maintenance', data)
+      setResult(`Urgent maintenance: ${Array.isArray(data) ? data.length : 0} found`, data)
     } catch (error) {
       setError('Urgent maintenance failed', error)
     }
@@ -843,6 +941,11 @@ function App() {
           <button className={activePage === 'output' ? 'nav-active' : ''} onClick={() => setActivePage('output')}>Last Response</button>
         </nav>
       </header>
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
 
       {activePage === 'dashboard' && (
         <section className="panel">
@@ -949,6 +1052,7 @@ function App() {
               <button onClick={handleGetAllProperties}>Get All Properties</button>
               <div className="row">
                 <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
+                  <option value="">Select type...</option>
                   {PROPERTY_TYPES.map((type) => (
                     <option key={type} value={type}>{type}</option>
                   ))}
@@ -1060,6 +1164,7 @@ function App() {
               </div>
               <div className="row">
                 <select value={tenantEmployment} onChange={(e) => setTenantEmployment(e.target.value)}>
+                  <option value="">Select employment status...</option>
                   {EMPLOYMENT_STATUSES.map((status) => (
                     <option key={status} value={status}>{status}</option>
                   ))}
@@ -1102,8 +1207,22 @@ function App() {
           <div className="card">
             <h3>Create Lease</h3>
             <div className="form-grid">
-              <input placeholder="Property ID" value={leaseCreate.propertyId} onChange={(e) => setLeaseCreate({ ...leaseCreate, propertyId: e.target.value })} />
-              <input placeholder="Tenant ID" value={leaseCreate.tenantId} onChange={(e) => setLeaseCreate({ ...leaseCreate, tenantId: e.target.value })} />
+              <select value={leaseCreate.propertyId} onChange={(e) => setLeaseCreate({ ...leaseCreate, propertyId: e.target.value })}>
+                <option value="">Select Property...</option>
+                {propertiesList.map((prop) => (
+                  <option key={prop.propertyId} value={prop.propertyId}>
+                    {prop.address} - ${prop.rentAmount}/mo
+                  </option>
+                ))}
+              </select>
+              <select value={leaseCreate.tenantId} onChange={(e) => setLeaseCreate({ ...leaseCreate, tenantId: e.target.value })}>
+                <option value="">Select Tenant...</option>
+                {tenantsList.map((tenant) => (
+                  <option key={tenant.tenantId} value={tenant.tenantId}>
+                    {tenant.firstName} {tenant.lastName} - {tenant.email}
+                  </option>
+                ))}
+              </select>
               <input type="date" placeholder="Start Date" value={leaseCreate.startDate} onChange={(e) => setLeaseCreate({ ...leaseCreate, startDate: e.target.value })} />
               <input type="date" placeholder="End Date" value={leaseCreate.endDate} onChange={(e) => setLeaseCreate({ ...leaseCreate, endDate: e.target.value })} />
               <input type="number" step="0.01" placeholder="Monthly Rent" value={leaseCreate.monthlyRent} onChange={(e) => setLeaseCreate({ ...leaseCreate, monthlyRent: e.target.value })} />
@@ -1126,9 +1245,23 @@ function App() {
                   <button className="ghost" onClick={() => setActiveModal(null)}>Close</button>
                 </div>
                 <div className="form-grid">
-                  <input placeholder="Lease ID" value={leaseUpdate.id} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, id: e.target.value })} />
-                  <input placeholder="Property ID" value={leaseUpdate.propertyId} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, propertyId: e.target.value })} />
-                  <input placeholder="Tenant ID" value={leaseUpdate.tenantId} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, tenantId: e.target.value })} />
+                  <input placeholder="Lease ID" value={leaseUpdate.id} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, id: e.target.value })} disabled />
+                  <select value={leaseUpdate.propertyId} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, propertyId: e.target.value })}>
+                    <option value="">Select Property...</option>
+                    {propertiesList.map((prop) => (
+                      <option key={prop.propertyId} value={prop.propertyId}>
+                        {prop.address} - ${prop.rentAmount}/mo
+                      </option>
+                    ))}
+                  </select>
+                  <select value={leaseUpdate.tenantId} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, tenantId: e.target.value })}>
+                    <option value="">Select Tenant...</option>
+                    {tenantsList.map((tenant) => (
+                      <option key={tenant.tenantId} value={tenant.tenantId}>
+                        {tenant.firstName} {tenant.lastName} - {tenant.email}
+                      </option>
+                    ))}
+                  </select>
                   <input type="date" placeholder="Start Date" value={leaseUpdate.startDate} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, startDate: e.target.value })} />
                   <input type="date" placeholder="End Date" value={leaseUpdate.endDate} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, endDate: e.target.value })} />
                   <input type="number" step="0.01" placeholder="Monthly Rent" value={leaseUpdate.monthlyRent} onChange={(e) => setLeaseUpdate({ ...leaseUpdate, monthlyRent: e.target.value })} />
@@ -1166,6 +1299,7 @@ function App() {
               </div>
               <div className="row">
                 <select value={leaseStatus} onChange={(e) => setLeaseStatus(e.target.value)}>
+                  <option value="">Select status...</option>
                   {LEASE_STATUSES.map((status) => (
                     <option key={status} value={status}>{status}</option>
                   ))}
@@ -1212,7 +1346,14 @@ function App() {
           <div className="card">
             <h3>Create Payment</h3>
             <div className="form-grid">
-              <input placeholder="Lease ID" value={paymentCreate.leaseId} onChange={(e) => setPaymentCreate({ ...paymentCreate, leaseId: e.target.value })} />
+              <select value={paymentCreate.leaseId} onChange={(e) => setPaymentCreate({ ...paymentCreate, leaseId: e.target.value })}>
+                <option value="">Select Lease...</option>
+                {leasesList.map((lease) => (
+                  <option key={lease.leaseId} value={lease.leaseId}>
+                    Lease #{lease.leaseId} - {lease.propertyAddress} ({lease.tenantName})
+                  </option>
+                ))}
+              </select>
               <input type="date" placeholder="Payment Date" value={paymentCreate.paymentDate} onChange={(e) => setPaymentCreate({ ...paymentCreate, paymentDate: e.target.value })} />
               <input type="number" step="0.01" placeholder="Amount" value={paymentCreate.amount} onChange={(e) => setPaymentCreate({ ...paymentCreate, amount: e.target.value })} />
               <select value={paymentCreate.paymentType} onChange={(e) => setPaymentCreate({ ...paymentCreate, paymentType: e.target.value })}>
@@ -1288,6 +1429,7 @@ function App() {
               </div>
               <div className="row">
                 <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)}>
+                  <option value="">Select status...</option>
                   {PAYMENT_STATUSES.map((status) => (
                     <option key={status} value={status}>{status}</option>
                   ))}
@@ -1338,8 +1480,22 @@ function App() {
           <div className="card">
             <h3>Create Maintenance Request</h3>
             <div className="form-grid">
-              <input placeholder="Property ID" value={maintenanceCreate.propertyId} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, propertyId: e.target.value })} />
-              <input placeholder="Tenant ID (optional)" value={maintenanceCreate.tenantId} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, tenantId: e.target.value })} />
+              <select value={maintenanceCreate.propertyId} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, propertyId: e.target.value })}>
+                <option value="">Select Property...</option>
+                {propertiesList.map((prop) => (
+                  <option key={prop.propertyId} value={prop.propertyId}>
+                    {prop.address}
+                  </option>
+                ))}
+              </select>
+              <select value={maintenanceCreate.tenantId} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, tenantId: e.target.value })}>
+                <option value="">Select Tenant (optional)...</option>
+                {tenantsList.map((tenant) => (
+                  <option key={tenant.tenantId} value={tenant.tenantId}>
+                    {tenant.firstName} {tenant.lastName}
+                  </option>
+                ))}
+              </select>
               <input type="date" placeholder="Request Date" value={maintenanceCreate.requestDate} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, requestDate: e.target.value })} />
               <input placeholder="Description" value={maintenanceCreate.description} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, description: e.target.value })} />
               <select value={maintenanceCreate.priority} onChange={(e) => setMaintenanceCreate({ ...maintenanceCreate, priority: e.target.value })}>
@@ -1410,6 +1566,7 @@ function App() {
               </div>
               <div className="row">
                 <select value={maintenanceStatus} onChange={(e) => setMaintenanceStatus(e.target.value)}>
+                  <option value="">Select status...</option>
                   {MAINTENANCE_STATUSES.map((status) => (
                     <option key={status} value={status}>{status}</option>
                   ))}
@@ -1418,6 +1575,7 @@ function App() {
               </div>
               <div className="row">
                 <select value={maintenancePriority} onChange={(e) => setMaintenancePriority(e.target.value)}>
+                  <option value="">Select priority...</option>
                   {PRIORITIES.map((priority) => (
                     <option key={priority} value={priority}>{priority}</option>
                   ))}
